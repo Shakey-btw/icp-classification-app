@@ -74,7 +74,7 @@ export default function ExportPage() {
             Classification Complete
           </h1>
           <p className="text-gray-600">
-            You've classified all {sessionData.total_websites} websites
+            You&apos;ve classified all {sessionData.total_websites} websites
           </p>
         </div>
 
