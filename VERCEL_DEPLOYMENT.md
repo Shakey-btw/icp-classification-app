@@ -6,19 +6,21 @@ Your backend is now ready for Vercel! The code automatically detects whether it'
 
 The app now uses:
 - **Development**: Local JSON files (automatic, no setup)
-- **Production (Vercel)**: Vercel KV + Vercel Blob (needs setup)
+- **Production (Vercel)**: Upstash Redis + Vercel Blob (needs setup)
 
 ## Step 1: Deploy Backend to Vercel
 
-### 1.1 Create Vercel KV Database
+### 1.1 Create Upstash Redis Database (for sessions)
 
 1. Go to https://vercel.com/dashboard
 2. Click your project (or create new)
 3. Go to **Storage** tab
-4. Click **Create Database** → Select **KV**
-5. Name it `icp-sessions` → Create
+4. Click **Create Database** → Scroll to **Marketplace Database Providers**
+5. Click **Upstash** → Click **Continue**
+6. Create a Redis database → Name it `icp-sessions`
+7. Vercel will auto-connect it to your project
 
-### 1.2 Create Vercel Blob Storage
+### 1.2 Create Vercel Blob Storage (for files)
 
 1. Still in Storage tab
 2. Click **Create Store** → Select **Blob**
@@ -76,7 +78,7 @@ Uploads → data/uploads/ (local files)
 
 ### Production (Vercel)
 ```
-Sessions → Vercel KV (Redis)
+Sessions → Upstash Redis (via Vercel Marketplace)
 Uploads → Vercel Blob (Cloud storage)
 ```
 
@@ -84,17 +86,18 @@ The code automatically detects the environment and uses the right storage!
 
 ## Troubleshooting
 
-**"KV credentials not found"**
-- Make sure you created Vercel KV and it's linked to your project
-- Check Environment Variables tab has `KV_REST_API_URL` and `KV_REST_API_TOKEN`
+**"Redis credentials not found"**
+- Make sure you connected Upstash Redis from Vercel Storage → Marketplace
+- Check Environment Variables tab has `KV_URL` or `REDIS_URL`
+- Verify the integration is properly connected in Vercel dashboard
 
 **"Blob token not found"**
 - Make sure you created Vercel Blob and it's linked to your project
 - Check Environment Variables tab has `BLOB_READ_WRITE_TOKEN`
 
 **Sessions not persisting**
-- Check Vercel KV is properly configured
-- View KV data in Vercel dashboard → Storage → KV → Browse
+- Check Upstash Redis is properly connected
+- View data in Upstash dashboard (link from Vercel Storage tab)
 
 **Files not uploading**
 - Check Vercel Blob is properly configured
@@ -103,7 +106,7 @@ The code automatically detects the environment and uses the right storage!
 ## Cost
 
 **Free Tier Includes:**
-- Vercel KV: 256 MB storage, 10k commands/month
+- Upstash Redis: 10k commands/day (free tier)
 - Vercel Blob: 1 GB storage, 10k operations/month
 - More than enough for personal use!
 

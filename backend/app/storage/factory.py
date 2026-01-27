@@ -11,8 +11,16 @@ def get_storage_backend() -> StorageBackend:
     # Check if we're running on Vercel
     is_vercel = os.getenv("VERCEL") == "1"
 
-    if is_vercel and os.getenv("KV_REST_API_URL"):
-        # Use Vercel KV in production
+    # Check for Upstash Redis (from Vercel Marketplace)
+    has_redis = (
+        os.getenv("KV_URL") or
+        os.getenv("REDIS_URL") or
+        os.getenv("UPSTASH_REDIS_REST_URL") or
+        os.getenv("KV_REST_API_URL")
+    )
+
+    if is_vercel and has_redis:
+        # Use Upstash Redis in production
         return VercelKVBackend()
     else:
         # Use local file storage in development

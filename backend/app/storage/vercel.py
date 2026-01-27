@@ -7,20 +7,27 @@ from .base import StorageBackend, FileStorageBackend
 
 
 class VercelKVBackend(StorageBackend):
-    """Vercel KV (Redis) storage for sessions."""
+    """Upstash Redis storage for sessions (via Vercel Marketplace)."""
 
     def __init__(self):
-        # Vercel KV connection from environment
-        kv_url = os.getenv("KV_REST_API_URL")
-        kv_token = os.getenv("KV_REST_API_TOKEN")
+        # Check for Upstash Redis connection (Vercel Marketplace integration)
+        # Upstash provides these env vars when connected via Vercel
+        redis_url = (
+            os.getenv("KV_URL") or
+            os.getenv("REDIS_URL") or
+            os.getenv("UPSTASH_REDIS_REST_URL") or
+            os.getenv("KV_REST_API_URL")
+        )
 
-        if not kv_url or not kv_token:
-            raise ValueError("Vercel KV credentials not found in environment")
+        if not redis_url:
+            raise ValueError(
+                "Redis credentials not found. Please connect Upstash Redis "
+                "from Vercel Storage → Marketplace"
+            )
 
-        # Use Vercel KV REST API URL
+        # Connect to Upstash Redis
         self.client = redis.from_url(
-            kv_url,
-            password=kv_token,
+            redis_url,
             decode_responses=True
         )
 
