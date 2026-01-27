@@ -11,7 +11,8 @@ import type {
   UndoResponse,
 } from '@/types';
 
-const API_BASE_URL = '/api';
+// Use environment variable if set, otherwise use relative path (works with Next.js rewrites)
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || '/api';
 
 export class APIClient {
   /**
