@@ -104,9 +104,17 @@ export default function ClassifyPage() {
       {/* Header */}
       <header className="bg-white border-b border-gray-200 px-8 py-4">
         <div className="max-w-7xl mx-auto flex items-center justify-between">
-          <h1 className="text-xl font-medium text-gray-900">
-            ICP Classification
-          </h1>
+          <div className="flex items-center gap-4">
+            <h1 className="text-xl font-medium text-gray-900">
+              ICP Classification
+            </h1>
+            <button
+              onClick={() => router.push('/')}
+              className="px-3 py-1 text-sm text-blue-600 hover:text-blue-700 hover:bg-blue-50 rounded transition-colors"
+            >
+              New
+            </button>
+          </div>
           <div className="flex items-center gap-6">
             <ProgressBar current={classifiedCount} total={session.total_websites} />
             <button
