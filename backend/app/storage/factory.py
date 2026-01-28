@@ -16,7 +16,8 @@ def get_storage_backend() -> StorageBackend:
         os.getenv("KV_URL") or
         os.getenv("REDIS_URL") or
         os.getenv("UPSTASH_REDIS_REST_URL") or
-        os.getenv("KV_REST_API_URL")
+        os.getenv("KV_REST_API_URL") or
+        os.getenv("STORAGE_URL")
     )
 
     if is_vercel and has_redis:
