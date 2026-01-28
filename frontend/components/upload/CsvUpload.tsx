@@ -133,7 +133,7 @@ export default function CsvUpload() {
         <p className="font-medium text-gray-900 mb-2">Requirements:</p>
         <ul className="list-disc list-inside space-y-1">
           <li>CSV file with a column containing website URLs</li>
-          <li>Column can be named: url, URL, website, domain, or link</li>
+          <li>Column can be named: Website URL, Domain, Website, Domain URL, or Website Link (case-insensitive)</li>
           <li>Maximum file size: 10MB</li>
         </ul>
       </div>

@@ -70,12 +70,18 @@ export async function parseCSV(file: File): Promise<ParseResult> {
  * Detect which column contains URLs
  */
 function detectURLColumn(firstRow: Record<string, any>): string | null {
-  const urlKeywords = ['url', 'website', 'domain', 'link', 'site'];
+  const validColumnNames = [
+    'website url',
+    'domain',
+    'website',
+    'domain url',
+    'website link'
+  ];
 
-  // Check column names
+  // Check for exact matches (case-insensitive)
   for (const key of Object.keys(firstRow)) {
-    const lowerKey = key.toLowerCase();
-    if (urlKeywords.some(keyword => lowerKey.includes(keyword))) {
+    const lowerKey = key.toLowerCase().trim();
+    if (validColumnNames.includes(lowerKey)) {
       return key;
     }
   }
