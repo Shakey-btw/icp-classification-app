@@ -2,22 +2,26 @@
 
 import { useEffect, useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
-import { APIClient } from '@/lib/api';
-import ExportButton from '@/components/export/ExportButton';
+import { storage, Session } from '@/lib/storage';
+import { exportToCSV } from '@/lib/csvParser';
 
 export default function ExportPage() {
   const params = useParams();
   const router = useRouter();
   const sessionId = params.sessionId as string;
 
-  const [sessionData, setSessionData] = useState<any>(null);
+  const [session, setSession] = useState<Session | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
     const loadSession = async () => {
       try {
-        const data = await APIClient.getSession(sessionId);
-        setSessionData(data);
+        const data = await storage.getSession(sessionId);
+        if (!data) {
+          router.push('/');
+          return;
+        }
+        setSession(data);
       } catch (error) {
         console.error('Failed to load session:', error);
         router.push('/');
@@ -39,16 +43,24 @@ export default function ExportPage() {
     );
   }
 
-  if (!sessionData) {
+  if (!session) {
     return null;
   }
 
-  const icpCount = Object.values(sessionData.classifications).filter(
+  const icpCount = Object.values(session.classifications).filter(
     (c) => c === 'icp'
   ).length;
-  const notIcpCount = Object.values(sessionData.classifications).filter(
+  const notIcpCount = Object.values(session.classifications).filter(
     (c) => c === 'not_icp'
   ).length;
+
+  const handleExport = () => {
+    exportToCSV(
+      session.websites,
+      session.classifications,
+      session.csv_filename
+    );
+  };
 
   return (
     <main className="min-h-screen bg-gray-50">
@@ -74,7 +86,7 @@ export default function ExportPage() {
             Classification Complete
           </h1>
           <p className="text-gray-600">
-            You&apos;ve classified all {sessionData.total_websites} websites
+            You&apos;ve classified all {session.total_websites} websites
           </p>
         </div>
 
@@ -103,7 +115,12 @@ export default function ExportPage() {
 
         {/* Export Button */}
         <div className="text-center space-y-4">
-          <ExportButton sessionId={sessionId} />
+          <button
+            onClick={handleExport}
+            className="px-6 py-3 bg-blue-600 text-white font-medium rounded hover:bg-blue-700 transition-colors"
+          >
+            Download Classified CSV
+          </button>
           <div>
             <button
               onClick={() => router.push('/')}

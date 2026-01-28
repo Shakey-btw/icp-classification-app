@@ -1,7 +1,6 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { APIClient } from '@/lib/api';
 import { preloader } from '@/lib/preloader';
 
 interface WebsiteViewerProps {
@@ -14,7 +13,7 @@ export default function WebsiteViewer({ url, className = '' }: WebsiteViewerProp
   const [error, setError] = useState(false);
   const [htmlContent, setHtmlContent] = useState<string | null>(null);
 
-  const proxyURL = APIClient.getProxyURL(url);
+  const proxyURL = `/api/proxy?url=${encodeURIComponent(url)}`;
 
   // Check if content is preloaded
   useEffect(() => {

@@ -2,8 +2,8 @@
 
 import { useState, useRef, DragEvent, ChangeEvent } from 'react';
 import { useRouter } from 'next/navigation';
-import { APIClient } from '@/lib/api';
-import { useClassificationStore } from '@/store/classificationStore';
+import { parseCSV } from '@/lib/csvParser';
+import { storage } from '@/lib/storage';
 
 export default function CsvUpload() {
   const router = useRouter();
@@ -11,8 +11,6 @@ export default function CsvUpload() {
   const [isDragging, setIsDragging] = useState(false);
   const [isUploading, setIsUploading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-
-  const setSession = useClassificationStore((state) => state.setSession);
 
   const handleFile = async (file: File) => {
     // Validate file type
@@ -25,19 +23,16 @@ export default function CsvUpload() {
     setError(null);
 
     try {
-      const response = await APIClient.uploadCSV(file);
+      // Parse CSV client-side
+      const { websites } = await parseCSV(file);
 
-      // Set session in store
-      setSession(
-        response.session_id,
-        response.first_batch,
-        response.total_websites
-      );
+      // Create session in IndexedDB
+      const session = await storage.createSession(websites, file.name);
 
       // Navigate to classification page
-      router.push(`/classify/${response.session_id}`);
+      router.push(`/classify/${session.session_id}`);
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to upload file');
+      setError(err instanceof Error ? err.message : 'Failed to parse CSV');
     } finally {
       setIsUploading(false);
     }

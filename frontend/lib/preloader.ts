@@ -1,8 +1,6 @@
 /**
  * Website preloader for smooth navigation experience.
  */
-import { APIClient } from './api';
-
 export class WebsitePreloader {
   private preloadedContent: Map<string, string> = new Map();
   private loading: Set<string> = new Set();
@@ -28,7 +26,7 @@ export class WebsitePreloader {
     this.loading.add(url);
 
     try {
-      const proxyURL = APIClient.getProxyURL(url);
+      const proxyURL = `/api/proxy?url=${encodeURIComponent(url)}`;
       const response = await fetch(proxyURL);
 
       if (response.ok) {
