@@ -15,17 +15,51 @@ export default function WebsiteViewer({ url, className = '' }: WebsiteViewerProp
 
   const proxyURL = `/api/proxy?url=${encodeURIComponent(url)}`;
 
-  // Check if content is preloaded
+  // Check if content is preloaded or wait for it to finish loading
   useEffect(() => {
-    const preloadedContent = preloader.get(url);
-    if (preloadedContent) {
-      setHtmlContent(preloadedContent);
-      setIsLoading(false);
-      setError(false);
-    } else {
-      setHtmlContent(null);
-      setIsLoading(true);
-    }
+    let mounted = true;
+
+    const checkPreloaded = async () => {
+      const preloadedContent = preloader.get(url);
+      if (preloadedContent) {
+        if (mounted) {
+          setHtmlContent(preloadedContent);
+          setIsLoading(false);
+          setError(false);
+        }
+      } else if (preloader.isLoading(url)) {
+        // Wait for preload to complete
+        const interval = setInterval(() => {
+          const content = preloader.get(url);
+          if (content && mounted) {
+            setHtmlContent(content);
+            setIsLoading(false);
+            setError(false);
+            clearInterval(interval);
+          }
+        }, 100);
+
+        // Timeout after 5 seconds
+        setTimeout(() => {
+          clearInterval(interval);
+          if (mounted && !preloader.get(url)) {
+            setHtmlContent(null);
+            setIsLoading(true);
+          }
+        }, 5000);
+      } else {
+        if (mounted) {
+          setHtmlContent(null);
+          setIsLoading(true);
+        }
+      }
+    };
+
+    checkPreloaded();
+
+    return () => {
+      mounted = false;
+    };
   }, [url]);
 
   const handleLoad = () => {

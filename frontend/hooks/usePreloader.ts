@@ -7,10 +7,11 @@ import { preloader } from '@/lib/preloader';
 export function usePreloader(
   urls: string[],
   currentIndex: number,
-  preloadCount: number = 10
+  preloadCount: number = 15
 ) {
   useEffect(() => {
-    // Preload next N websites
+    // Preload current website + next N websites ahead
+    // This ensures smooth navigation without waiting for loads
     const startIndex = currentIndex;
     const endIndex = Math.min(currentIndex + preloadCount, urls.length);
     const urlsToPreload = urls.slice(startIndex, endIndex);
