@@ -4,11 +4,21 @@ import { useEffect, useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import { useKeyboardNavigation } from '@/hooks/useKeyboardNavigation';
 import { usePreloader } from '@/hooks/usePreloader';
-import { storage, Session } from '@/lib/storage';
+import { storage, Session, Industry } from '@/lib/storage';
 import { exportToCSV } from '@/lib/csvParser';
 import WebsiteViewer from '@/components/classification/WebsiteViewer';
 import ProgressBar from '@/components/classification/ProgressBar';
 import Controls from '@/components/classification/Controls';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
+import { Button } from '@/components/ui/button';
+import { ChevronDown } from 'lucide-react';
+
+export type ClassificationMode = 'icp' | 'industry';
 
 export default function ClassifyPage() {
   const params = useParams();
@@ -17,6 +27,7 @@ export default function ClassifyPage() {
 
   const [session, setSession] = useState<Session | null>(null);
   const [toast, setToast] = useState<string | null>(null);
+  const [mode, setMode] = useState<ClassificationMode>('icp');
 
   // Load session from IndexedDB
   useEffect(() => {
@@ -35,7 +46,7 @@ export default function ClassifyPage() {
   // Preload next websites
   const websites = session?.websites || [];
   const currentIndex = session?.current_index || 0;
-  usePreloader(websites.map(w => w.url), currentIndex, 10);
+  usePreloader(websites.map(w => w.url), currentIndex, 20);
 
   // Check if all websites are classified
   useEffect(() => {
@@ -61,6 +72,21 @@ export default function ClassifyPage() {
     setSession(updatedSession);
   };
 
+  const handleIndustryClassify = async (industry: Industry) => {
+    if (!session) return;
+
+    const website = session.websites[currentIndex];
+    if (!website) return;
+
+    // Update session in IndexedDB
+    const updatedSession = await storage.classifyIndustry(
+      sessionId,
+      website.id,
+      industry
+    );
+    setSession(updatedSession);
+  };
+
   const handleUndo = async () => {
     if (!session || session.classification_history.length === 0) return;
 
@@ -72,12 +98,20 @@ export default function ClassifyPage() {
     setTimeout(() => setToast(null), 2000);
   };
 
-  // Keyboard navigation
+  const handleOpenInNewTab = () => {
+    const website = session?.websites[currentIndex];
+    if (website?.url) {
+      window.open(website.url, '_blank', 'noopener,noreferrer');
+    }
+  };
+
+  // Keyboard navigation (only for ICP mode)
   useKeyboardNavigation({
     onLeft: () => handleClassify('not_icp'),
     onRight: () => handleClassify('icp'),
     onUndo: handleUndo,
-    enabled: !!session,
+    onOpenInNewTab: handleOpenInNewTab,
+    enabled: !!session && mode === 'icp',
   });
 
   if (!session || currentIndex >= websites.length) {
@@ -95,6 +129,7 @@ export default function ClassifyPage() {
     exportToCSV(
       session.websites,
       session.classifications,
+      session.industries,
       session.csv_filename
     );
   };
@@ -102,27 +137,50 @@ export default function ClassifyPage() {
   return (
     <div className="min-h-screen flex flex-col bg-gray-50">
       {/* Header */}
-      <header className="bg-white border-b border-gray-200 px-8 py-4">
+      <header className="px-8 py-4" style={{ borderBottom: '1px solid #EAEBEF' }}>
         <div className="max-w-7xl mx-auto flex items-center justify-between">
           <div className="flex items-center gap-4">
-            <h1 className="text-xl font-medium text-gray-900">
-              ICP Classification
-            </h1>
             <button
               onClick={() => router.push('/')}
-              className="px-3 py-1 text-sm text-blue-600 hover:text-blue-700 hover:bg-blue-50 rounded transition-colors"
+              className="text-xl font-medium text-gray-900 hover:text-blue-600 transition-colors"
             >
-              New
+              Procuros Tinder
             </button>
+            <DropdownMenu>
+              <DropdownMenuTrigger className="inline-flex items-center gap-2 px-3 py-1.5 text-sm border border-gray-300 rounded-md bg-white hover:bg-gray-50 data-[state=open]:bg-gray-50 focus:outline-none transition-colors cursor-pointer">
+                {mode === 'icp' ? 'ICP Check' : 'Industry'}
+                <ChevronDown className="h-4 w-4" />
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="start">
+                <DropdownMenuItem onClick={() => setMode('icp')}>
+                  ICP Check
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={() => setMode('industry')}>
+                  Industry
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
           </div>
           <div className="flex items-center gap-6">
             <ProgressBar current={classifiedCount} total={session.total_websites} />
-            <button
+            <Button
               onClick={handleDownload}
-              className="px-4 py-2 bg-blue-600 text-white text-sm rounded hover:bg-blue-700 transition-colors"
+              style={{
+                backgroundColor: 'white',
+                border: '1px solid #E1E2EA',
+                color: '#1F2937',
+                fontSize: '14px',
+                paddingLeft: '17px',
+                paddingRight: '17px',
+                paddingTop: '11px',
+                paddingBottom: '11px',
+                borderRadius: '10px',
+                boxShadow: '0 1px 3px 0 rgba(225, 229, 237, 0.72), inset 0 -1px 1px 2px #F5F6F9',
+              }}
+              className="transition-opacity duration-200 hover:opacity-90"
             >
               Download CSV
-            </button>
+            </Button>
           </div>
         </div>
       </header>
@@ -132,7 +190,7 @@ export default function ClassifyPage() {
         <div className="max-w-7xl mx-auto w-full mb-4" style={{ height: 'calc(100vh - 280px)' }}>
           <WebsiteViewer
             url={currentWebsite.url}
-            className="h-full rounded"
+            className="h-full"
           />
         </div>
 
@@ -140,9 +198,12 @@ export default function ClassifyPage() {
         <div className="max-w-7xl mx-auto w-full">
           <Controls
             currentUrl={currentWebsite.url}
+            mode={mode}
             onLeft={() => handleClassify('not_icp')}
             onRight={() => handleClassify('icp')}
             onUndo={handleUndo}
+            onOpenInNewTab={handleOpenInNewTab}
+            onIndustrySelect={handleIndustryClassify}
             canUndo={session.classification_history.length > 0}
           />
         </div>

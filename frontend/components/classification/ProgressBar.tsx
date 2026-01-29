@@ -10,7 +10,7 @@ export default function ProgressBar({ current, total }: ProgressBarProps) {
 
   return (
     <div className="space-y-2">
-      <div className="flex justify-between items-center">
+      <div className="flex justify-between items-center gap-3">
         <span className="text-sm text-gray-600">
           Progress
         </span>

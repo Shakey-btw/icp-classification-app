@@ -39,7 +39,7 @@ export default function HomePage() {
         {/* Header */}
         <div className="text-center mb-16">
           <h1 className="text-4xl font-medium text-gray-900 mb-4">
-            ICP Classification
+            Procuros Tinder
           </h1>
           <p className="text-gray-600">
             Upload a CSV with website URLs to start classifying

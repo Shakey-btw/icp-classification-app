@@ -16,6 +16,73 @@ export async function GET(request: NextRequest) {
     });
 
     if (!response.ok) {
+      // Special handling for payment required
+      if (response.status === 402) {
+        const errorHTML = `
+          <!DOCTYPE html>
+          <html>
+            <head>
+              <title>Payment Required</title>
+              <style>
+                body {
+                  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+                  display: flex;
+                  align-items: center;
+                  justify-content: center;
+                  min-height: 100vh;
+                  margin: 0;
+                  background: #f9fafb;
+                  padding: 20px;
+                }
+                .error-container {
+                  text-align: center;
+                  max-width: 500px;
+                }
+                .error-title {
+                  font-size: 20px;
+                  font-weight: 600;
+                  color: #111827;
+                  margin-bottom: 12px;
+                }
+                .error-details {
+                  font-size: 14px;
+                  color: #6b7280;
+                  margin-bottom: 20px;
+                }
+                .open-link {
+                  display: inline-block;
+                  background: #2563eb;
+                  color: white;
+                  padding: 10px 20px;
+                  border-radius: 6px;
+                  text-decoration: none;
+                  font-size: 14px;
+                  transition: background 0.2s;
+                }
+                .open-link:hover {
+                  background: #1d4ed8;
+                }
+              </style>
+            </head>
+            <body>
+              <div class="error-container">
+                <div class="error-title">Payment Required</div>
+                <div class="error-details">This website requires payment or subscription to access.</div>
+                <a href="${url}" target="_blank" rel="noopener noreferrer" class="open-link">
+                  Open in new tab
+                </a>
+              </div>
+            </body>
+          </html>
+        `;
+        return new NextResponse(errorHTML, {
+          status: 200,
+          headers: {
+            'Content-Type': 'text/html; charset=utf-8',
+          },
+        });
+      }
+
       return NextResponse.json(
         { error: `Failed to fetch: ${response.statusText}` },
         { status: response.status }
@@ -40,8 +107,8 @@ export async function GET(request: NextRequest) {
         // Remove existing base tags that might conflict
         .replace(/<base[^>]*>/gi, '');
 
-      // Inject base tag to fix relative URLs
-      const baseTag = `<base href="${baseUrl}/" target="_parent">`;
+      // Inject base tag to fix relative URLs (no target so links stay in iframe)
+      const baseTag = `<base href="${baseUrl}/">`;
 
       // Try to inject after <head> tag
       if (modifiedHTML.match(/<head>/i)) {

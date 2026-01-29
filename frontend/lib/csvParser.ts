@@ -125,17 +125,27 @@ function normalizeURL(url: string): string {
 export function exportToCSV(
   websites: Website[],
   classifications: Record<number, 'icp' | 'not_icp'>,
+  industries: Record<number, string>,
   filename: string
 ): void {
-  // Add ICP classification column to original data
-  const exportData = websites.map(website => ({
-    ...website.original_data,
-    ICP_Classification: classifications[website.id]
-      ? classifications[website.id] === 'icp'
-        ? 'ICP'
-        : 'NOT ICP'
-      : '',
-  }));
+  // Add ICP classification and Industry columns to original data
+  const exportData = websites.map(website => {
+    const row: Record<string, any> = {
+      ...website.original_data,
+    };
+
+    // Add ICP classification if exists
+    if (classifications[website.id]) {
+      row.ICP_Classification = classifications[website.id] === 'icp' ? 'ICP' : 'NOT ICP';
+    }
+
+    // Add Industry if exists
+    if (industries[website.id]) {
+      row.Industry = industries[website.id];
+    }
+
+    return row;
+  });
 
   // Convert to CSV
   const csv = Papa.unparse(exportData);

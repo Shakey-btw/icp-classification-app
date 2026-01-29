@@ -4,14 +4,26 @@
 export class WebsitePreloader {
   private preloadedContent: Map<string, string> = new Map();
   private loading: Set<string> = new Set();
-  private maxCacheSize: number = 20;
+  private maxCacheSize: number = 25; // Increased to accommodate 20 preloads + buffer
 
   /**
-   * Preload a batch of websites.
+   * Preload a batch of websites with priority loading.
+   * The first URL (next website) is loaded immediately with high priority.
+   * The rest are loaded in parallel in the background.
    */
   async preload(urls: string[]): Promise<void> {
-    const promises = urls.map((url) => this.preloadSingle(url));
-    await Promise.allSettled(promises);
+    if (urls.length === 0) return;
+
+    // Load the first URL (immediate next) with priority - await it
+    if (urls.length > 0) {
+      await this.preloadSingle(urls[0]);
+    }
+
+    // Load the rest in parallel in background (if any) - don't await
+    if (urls.length > 1) {
+      const remainingPromises = urls.slice(1).map((url) => this.preloadSingle(url));
+      Promise.allSettled(remainingPromises); // Fire and forget for faster perceived performance
+    }
   }
 
   /**
