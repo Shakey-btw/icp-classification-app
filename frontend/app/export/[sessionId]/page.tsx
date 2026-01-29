@@ -58,6 +58,7 @@ export default function ExportPage() {
     exportToCSV(
       session.websites,
       session.classifications,
+      session.industries,
       session.csv_filename
     );
   };
