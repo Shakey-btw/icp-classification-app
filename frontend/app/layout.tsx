@@ -2,7 +2,7 @@ import type { Metadata } from 'next';
 import './globals.css';
 
 export const metadata: Metadata = {
-  title: 'ICP Classification',
+  title: 'Procuros tinder',
   description: 'Classify websites as ICP or Not ICP',
 };
 
@@ -15,6 +15,7 @@ export default function RootLayout({
     <html lang="en">
       <head>
         <link rel="stylesheet" href="https://use.typekit.net/qlc7wiy.css" />
+        <link rel="icon" href="/procuros-logo.svg" type="image/svg+xml" />
       </head>
       <body>{children}</body>
     </html>

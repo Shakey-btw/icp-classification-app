@@ -5,23 +5,19 @@ import { Industry } from '@/lib/storage';
 type ClassificationMode = 'icp' | 'industry';
 
 interface ControlsProps {
-  currentUrl: string;
   mode: ClassificationMode;
   onLeft: () => void;
   onRight: () => void;
   onUndo: () => void;
-  onOpenInNewTab: () => void;
   onIndustrySelect: (industry: Industry) => void;
   canUndo: boolean;
 }
 
 export default function Controls({
-  currentUrl,
   mode,
   onLeft,
   onRight,
   onUndo,
-  onOpenInNewTab,
   onIndustrySelect,
   canUndo,
 }: ControlsProps) {
@@ -39,18 +35,6 @@ export default function Controls({
   ];
   return (
     <div className="space-y-4">
-      {/* Current URL */}
-      <div className="text-center">
-        <div className="text-sm text-gray-600 mb-1">Current Website</div>
-        <button
-          onClick={onOpenInNewTab}
-          className="text-sm font-medium text-blue-600 hover:text-blue-700 hover:underline truncate px-4 transition-colors active:scale-[0.97]"
-          title="Click to open in new tab (or press P)"
-        >
-          {currentUrl}
-        </button>
-      </div>
-
       {/* Classification Buttons */}
       {mode === 'icp' ? (
         <div className="flex items-center justify-center gap-8">
@@ -63,7 +47,7 @@ export default function Controls({
               color: 'white',
               fontSize: '14px',
               borderRadius: '10px',
-              boxShadow: '0 2px 2px 0 #E1E5ED, inset 0 1px 3px 3px rgba(75, 85, 99, 0.3)',
+              boxShadow: '0 2px 2px 0 #E1E5ED, inset 0 1px 3px 3px rgba(75, 85, 99, 0.42)',
             }}
           >
             ← Not ICP
@@ -78,7 +62,7 @@ export default function Controls({
               color: 'white',
               fontSize: '14px',
               borderRadius: '10px',
-              boxShadow: '0 2px 2px 0 #E1E5ED, inset 0 1px 3px 3px rgba(31, 183, 255, 0.3)',
+              boxShadow: '0 2px 2px 0 #E1E5ED, inset 0 1px 3px 3px rgba(31, 183, 255, 0.48)',
             }}
           >
             ICP →
@@ -99,7 +83,7 @@ export default function Controls({
                   color: 'white',
                   fontSize: '14px',
                   borderRadius: '10px',
-                  boxShadow: '0 2px 2px 0 #E1E5ED, inset 0 1px 3px 3px rgba(75, 85, 99, 0.3)',
+                  boxShadow: '0 2px 2px 0 #E1E5ED, inset 0 1px 3px 3px rgba(75, 85, 99, 0.42)',
                 }}
               >
                 {industry}
@@ -119,7 +103,7 @@ export default function Controls({
                   color: 'white',
                   fontSize: '14px',
                   borderRadius: '10px',
-                  boxShadow: '0 2px 2px 0 #E1E5ED, inset 0 1px 3px 3px rgba(75, 85, 99, 0.3)',
+                  boxShadow: '0 2px 2px 0 #E1E5ED, inset 0 1px 3px 3px rgba(75, 85, 99, 0.42)',
                 }}
               >
                 {industry}
@@ -130,7 +114,7 @@ export default function Controls({
       )}
 
       {/* Keyboard Hints */}
-      <div className="flex items-center justify-center gap-8 text-sm text-gray-600">
+      <div className="flex items-center justify-center gap-8 text-sm text-gray-400">
         {mode === 'icp' && (
           <>
             <div>← Left Arrow: Not ICP</div>

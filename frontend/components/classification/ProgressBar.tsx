@@ -1,29 +1,23 @@
 'use client';
 
+import { Field, FieldLabel } from "@/components/ui/field"
+import { Progress } from "@/components/ui/progress"
+
 interface ProgressBarProps {
   current: number;
   total: number;
 }
 
 export default function ProgressBar({ current, total }: ProgressBarProps) {
-  const percentage = total > 0 ? (current / total) * 100 : 0;
+  const percentage = total > 0 ? Math.round((current / total) * 100) : 0;
 
   return (
-    <div className="space-y-2">
-      <div className="flex justify-between items-center gap-3">
-        <span className="text-sm text-gray-600">
-          Progress
-        </span>
-        <span className="text-sm font-medium text-gray-900">
-          {current} / {total}
-        </span>
-      </div>
-      <div className="w-full bg-gray-200 rounded-full h-2">
-        <div
-          className="bg-blue-600 h-2 rounded-full transition-all duration-300"
-          style={{ width: `${percentage}%` }}
-        />
-      </div>
-    </div>
+    <Field className="w-[40%]" style={{ minWidth: '140px' }}>
+      <FieldLabel htmlFor="classification-progress" style={{ fontSize: '12px', marginBottom: '-4px', color: '#000000', fontWeight: '400' }}>
+        <span>Progress</span>
+        <span className="ml-auto">{current} / {total}</span>
+      </FieldLabel>
+      <Progress value={percentage} id="classification-progress" className="h-1.5" />
+    </Field>
   );
 }

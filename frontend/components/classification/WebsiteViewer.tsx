@@ -76,6 +76,16 @@ export default function WebsiteViewer({ url, className = '' }: WebsiteViewerProp
     setError(true);
   };
 
+  // Extract domain from URL
+  const getDomain = (url: string) => {
+    try {
+      const urlObj = new URL(url);
+      return urlObj.hostname.replace(/^www\./, '');
+    } catch {
+      return url;
+    }
+  };
+
   return (
     <div
       className={className}
@@ -138,6 +148,30 @@ export default function WebsiteViewer({ url, className = '' }: WebsiteViewerProp
             )}
           </>
         )}
+
+        {/* URL Button */}
+        <div className="absolute bottom-2 left-0 right-0 flex justify-center z-20 pointer-events-none">
+          <a
+            href={url}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="pointer-events-auto transition-all duration-200 opacity-80 hover:opacity-100 active:scale-[0.97] truncate max-w-[90%]"
+            style={{
+              backgroundColor: 'white',
+              border: '1px solid #E1E2EA',
+              color: '#1F2937',
+              fontSize: '14px',
+              paddingLeft: '20px',
+              paddingRight: '20px',
+              paddingTop: '4px',
+              paddingBottom: '4px',
+              borderRadius: '10px',
+              boxShadow: 'inset 0 -0.9px 0.9px 1.8px #E8E9ED',
+            }}
+          >
+            {getDomain(url)}
+          </a>
+        </div>
       </div>
     </div>
   );
