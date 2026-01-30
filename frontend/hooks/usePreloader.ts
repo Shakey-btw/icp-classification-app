@@ -17,6 +17,7 @@ export function usePreloader(
     const urlsToPreload = urls.slice(startIndex, endIndex);
 
     if (urlsToPreload.length > 0) {
+      console.log(`[usePreloader] Preloading ${urlsToPreload.length} websites starting from index ${currentIndex}`);
       preloader.preload(urlsToPreload);
     }
   }, [currentIndex, urls, preloadCount]);

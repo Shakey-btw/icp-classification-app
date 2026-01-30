@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { preloader } from '@/lib/preloader';
+import { Spinner } from '@/components/ui/spinner';
 
 interface WebsiteViewerProps {
   url: string;
@@ -20,18 +21,21 @@ export default function WebsiteViewer({ url, className = '' }: WebsiteViewerProp
     let mounted = true;
 
     // Reset state when URL changes
-    setIsLoading(true);
     setError(false);
 
     const checkPreloaded = async () => {
       const preloadedContent = preloader.get(url);
       if (preloadedContent) {
+        console.log(`[WebsiteViewer] ✓ Using preloaded content for ${url}`);
         if (mounted) {
           setHtmlContent(preloadedContent);
           setIsLoading(false);
           setError(false);
         }
       } else if (preloader.isLoading(url)) {
+        console.log(`[WebsiteViewer] ⏳ Waiting for ${url} to finish preloading...`);
+        // Don't show loading state - content is being preloaded and will arrive very soon
+        setIsLoading(false);
         // Wait for preload to complete
         const interval = setInterval(() => {
           const content = preloader.get(url);
@@ -41,7 +45,7 @@ export default function WebsiteViewer({ url, className = '' }: WebsiteViewerProp
             setError(false);
             clearInterval(interval);
           }
-        }, 100);
+        }, 50); // Check more frequently (50ms instead of 100ms)
 
         // Timeout after 5 seconds
         setTimeout(() => {
@@ -52,9 +56,10 @@ export default function WebsiteViewer({ url, className = '' }: WebsiteViewerProp
           }
         }, 5000);
       } else {
+        console.log(`[WebsiteViewer] ⚠️ NOT preloaded: ${url} - loading via proxy iframe`);
         if (mounted) {
           setHtmlContent(null);
-          // isLoading is already true from above, iframe will load and call handleLoad
+          setIsLoading(true); // Show loading for non-preloaded content
         }
       }
     };
@@ -99,7 +104,10 @@ export default function WebsiteViewer({ url, className = '' }: WebsiteViewerProp
       <div className="relative bg-white w-full h-full" style={{ borderRadius: '8px', overflow: 'hidden' }}>
         {isLoading && (
           <div className="absolute inset-0 flex items-center justify-center bg-white z-10">
-            <div className="text-gray-600">Loading website...</div>
+            <div className="inline-flex items-center px-3 py-1 rounded-lg bg-black text-white" style={{ gap: '6px', fontFamily: 'Inter, sans-serif', fontSize: '12px', fontWeight: 400, boxShadow: 'inset 0 -0.9px 0.9px 1.8px rgba(255, 255, 255, 0.1)' }}>
+              <Spinner className="text-white" />
+              Loading...
+            </div>
           </div>
         )}
 

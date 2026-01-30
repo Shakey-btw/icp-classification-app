@@ -32,9 +32,12 @@ export class WebsitePreloader {
   private async preloadSingle(url: string): Promise<void> {
     // Skip if already loaded or loading
     if (this.preloadedContent.has(url) || this.loading.has(url)) {
+      console.log(`[Preloader] Skipping ${url} (already loaded/loading)`);
       return;
     }
 
+    console.log(`[Preloader] Starting preload: ${url}`);
+    const startTime = Date.now();
     this.loading.add(url);
 
     try {
@@ -44,9 +47,13 @@ export class WebsitePreloader {
       if (response.ok) {
         const html = await response.text();
         this.set(url, html);
+        const duration = Date.now() - startTime;
+        console.log(`[Preloader] ✓ Loaded ${url} in ${duration}ms`);
+      } else {
+        console.warn(`[Preloader] Failed to preload ${url}: ${response.status}`);
       }
     } catch (error) {
-      console.error(`Failed to preload ${url}:`, error);
+      console.error(`[Preloader] Error preloading ${url}:`, error);
     } finally {
       this.loading.delete(url);
     }
