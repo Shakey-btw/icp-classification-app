@@ -38,7 +38,14 @@ export async function parseCSV(file: File): Promise<ParseResult> {
 
           // Extract websites
           const websites: Website[] = data
-            .filter(row => row[urlColumn])
+            .filter(row => {
+              if (!row[urlColumn]) return false;
+              const normalized = normalizeURL(row[urlColumn]);
+              // Filter out invalid URLs (empty, has spaces, or doesn't look like a domain)
+              return normalized &&
+                     !normalized.includes(' ') &&
+                     /^https?:\/\/[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}/.test(normalized);
+            })
             .map((row, index) => ({
               id: index,
               url: normalizeURL(row[urlColumn]),
@@ -46,8 +53,15 @@ export async function parseCSV(file: File): Promise<ParseResult> {
             }));
 
           if (websites.length === 0) {
-            reject(new Error('No valid URLs found in CSV'));
+            const skippedCount = data.length - websites.length;
+            reject(new Error(`No valid URLs found in CSV. ${skippedCount} rows were skipped because they don't contain valid website URLs (found company names or invalid data instead).`));
             return;
+          }
+
+          // Log info about skipped rows
+          const skippedCount = data.length - websites.length;
+          if (skippedCount > 0) {
+            console.warn(`Skipped ${skippedCount} rows with invalid URLs out of ${data.length} total rows`);
           }
 
           resolve({
@@ -113,6 +127,22 @@ function isURL(str: string): boolean {
  */
 function normalizeURL(url: string): string {
   url = url.trim();
+
+  // Decode URL-encoded strings (e.g., "bora%20vertriebs" -> "bora vertriebs")
+  try {
+    url = decodeURIComponent(url);
+  } catch {
+    // If decoding fails, use original string
+  }
+
+  // Remove any spaces (in case it's a company name)
+  url = url.replace(/\s+/g, '');
+
+  // If it still has non-URL characters after cleanup, it's likely not a valid URL
+  if (!url || url.includes(' ') || !/^[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}/.test(url.replace(/^https?:\/\//, ''))) {
+    return url; // Return as-is, will be filtered out
+  }
+
   if (!url.startsWith('http://') && !url.startsWith('https://')) {
     return `https://${url}`;
   }
