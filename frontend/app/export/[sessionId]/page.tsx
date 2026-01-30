@@ -118,14 +118,14 @@ export default function ExportPage() {
         <div className="text-center space-y-4">
           <button
             onClick={handleExport}
-            className="px-6 py-3 bg-blue-600 text-white font-medium rounded hover:bg-blue-700 transition-colors"
+            className="px-6 py-3 bg-blue-600 text-white font-medium rounded hover:bg-blue-700 transition-all active:scale-[0.97]"
           >
             Download Classified CSV
           </button>
           <div>
             <button
               onClick={() => router.push('/')}
-              className="text-sm text-gray-600 hover:text-gray-900"
+              className="text-sm text-gray-600 hover:text-gray-900 transition-transform active:scale-[0.97]"
             >
               Start new classification
             </button>

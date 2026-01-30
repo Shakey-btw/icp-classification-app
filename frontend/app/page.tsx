@@ -58,7 +58,7 @@ export default function HomePage() {
                   <button
                     key={session.session_id}
                     onClick={() => handleResumeSession(session.session_id)}
-                    className="w-full text-left p-4 bg-white border border-gray-200 rounded hover:border-blue-400 hover:bg-blue-50 transition-colors"
+                    className="w-full text-left p-4 bg-white border border-gray-200 rounded hover:border-blue-400 hover:bg-blue-50 transition-all active:scale-[0.97]"
                   >
                     <div className="flex justify-between items-center">
                       <div>

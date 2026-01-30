@@ -105,7 +105,7 @@ export default function WebsiteViewer({ url, className = '' }: WebsiteViewerProp
               href={url}
               target="_blank"
               rel="noopener noreferrer"
-              className="px-4 py-2 bg-blue-600 text-white rounded text-sm hover:bg-blue-700"
+              className="inline-block px-4 py-2 bg-blue-600 text-white rounded text-sm hover:bg-blue-700 transition-transform active:scale-[0.97]"
             >
               Open in new tab
             </a>

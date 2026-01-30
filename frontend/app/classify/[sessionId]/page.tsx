@@ -142,12 +142,12 @@ export default function ClassifyPage() {
           <div className="flex items-center gap-4">
             <button
               onClick={() => router.push('/')}
-              className="text-xl font-medium text-gray-900 hover:text-blue-600 transition-colors"
+              className="text-xl font-medium text-gray-900 hover:text-blue-600 transition-colors active:scale-[0.97]"
             >
               Procuros Tinder
             </button>
             <DropdownMenu>
-              <DropdownMenuTrigger className="inline-flex items-center gap-2 px-3 py-1.5 text-sm border border-gray-300 rounded-md bg-white hover:bg-gray-50 data-[state=open]:bg-gray-50 focus:outline-none transition-colors cursor-pointer">
+              <DropdownMenuTrigger className="inline-flex items-center gap-2 px-3 py-1.5 text-sm border border-gray-300 rounded-md bg-white hover:bg-gray-50 data-[state=open]:bg-gray-50 focus:outline-none transition-all cursor-pointer active:scale-[0.97]">
                 {mode === 'icp' ? 'ICP Check' : 'Industry'}
                 <ChevronDown className="h-4 w-4" />
               </DropdownMenuTrigger>
@@ -177,7 +177,7 @@ export default function ClassifyPage() {
                 borderRadius: '10px',
                 boxShadow: '0 1px 3px 0 rgba(225, 229, 237, 0.72), inset 0 -1px 1px 2px #F5F6F9',
               }}
-              className="transition-opacity duration-200 hover:opacity-90"
+              className="transition-all duration-200 hover:opacity-90 active:scale-[0.97]"
             >
               Download CSV
             </Button>
