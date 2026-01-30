@@ -100,6 +100,16 @@ function detectURLColumn(firstRow: Record<string, any>): string | null {
     }
   }
 
+  // Check for partial matches (e.g., "Organization - Website URL")
+  for (const key of Object.keys(firstRow)) {
+    const lowerKey = key.toLowerCase().trim();
+    if (lowerKey.includes('website url') ||
+        lowerKey.includes('website') ||
+        lowerKey.includes('domain')) {
+      return key;
+    }
+  }
+
   // Check if any value looks like a URL
   for (const [key, value] of Object.entries(firstRow)) {
     if (typeof value === 'string' && isURL(value)) {
