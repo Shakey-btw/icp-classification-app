@@ -2,8 +2,9 @@
 
 import { useEffect, useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
-import { storage, Session } from '@/lib/storage';
+import { storage, Session, Industry } from '@/lib/storage';
 import { exportToCSV } from '@/lib/csvParser';
+import Confetti from '@/components/ui/confetti';
 
 export default function ExportPage() {
   const params = useParams();
@@ -12,6 +13,7 @@ export default function ExportPage() {
 
   const [session, setSession] = useState<Session | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [showConfetti, setShowConfetti] = useState(true);
 
   useEffect(() => {
     const loadSession = async () => {
@@ -54,6 +56,32 @@ export default function ExportPage() {
     (c) => c === 'not_icp'
   ).length;
 
+  // Calculate industry statistics
+  const industryBreakdown = Object.values(session.industries).reduce(
+    (acc, industry) => {
+      acc[industry] = (acc[industry] || 0) + 1;
+      return acc;
+    },
+    {} as Record<Industry, number>
+  );
+
+  // Industry order for display
+  const industryOrder: Industry[] = [
+    'Grocery',
+    'Beauty & Cosmetics',
+    'DIY',
+    'Fashion & Apparel',
+    'Furniture',
+    'Logistics',
+    'Electronics',
+    'Pharma',
+    'Machinery & Manufacturing',
+    'Other',
+  ];
+
+  const hasIcpData = icpCount > 0 || notIcpCount > 0;
+  const hasIndustryData = Object.keys(session.industries).length > 0;
+
   const handleExport = () => {
     exportToCSV(
       session.websites,
@@ -92,26 +120,62 @@ export default function ExportPage() {
         </div>
 
         {/* Summary */}
-        <div className="max-w-2xl mx-auto mb-12">
-          <div className="bg-white border border-gray-200 rounded p-8">
-            <h2 className="text-xl font-medium text-gray-900 mb-6">
-              Summary
-            </h2>
-            <div className="grid grid-cols-2 gap-8">
-              <div>
-                <div className="text-3xl font-medium text-blue-600 mb-1">
-                  {icpCount}
+        <div className="max-w-2xl mx-auto mb-12 space-y-6">
+          {/* ICP Summary - Only show if has data */}
+          {hasIcpData && (
+            <div className="bg-white border border-gray-200 rounded p-8">
+              <h2 className="text-xl font-medium text-gray-900 mb-6">
+                ICP Classification
+              </h2>
+              <div className="grid grid-cols-2 gap-8">
+                <div>
+                  <div className="text-3xl font-medium text-blue-600 mb-1">
+                    {icpCount}
+                  </div>
+                  <div className="text-sm text-gray-600">ICP</div>
                 </div>
-                <div className="text-sm text-gray-600">ICP</div>
-              </div>
-              <div>
-                <div className="text-3xl font-medium text-gray-800 mb-1">
-                  {notIcpCount}
+                <div>
+                  <div className="text-3xl font-medium text-gray-800 mb-1">
+                    {notIcpCount}
+                  </div>
+                  <div className="text-sm text-gray-600">Not ICP</div>
                 </div>
-                <div className="text-sm text-gray-600">Not ICP</div>
               </div>
             </div>
-          </div>
+          )}
+
+          {/* Industry Summary - Only show if has data */}
+          {hasIndustryData && (
+            <div className="bg-white border border-gray-200 rounded p-8">
+              <h2 className="text-xl font-medium text-gray-900 mb-6">
+                Industry Classification
+              </h2>
+              <div className="grid grid-cols-2 gap-4">
+                {industryOrder.map((industry) => {
+                  const count = industryBreakdown[industry] || 0;
+                  if (count === 0) return null; // Hide zero counts
+
+                  return (
+                    <div key={industry}>
+                      <div className="text-2xl font-medium text-gray-900 mb-1">
+                        {count}
+                      </div>
+                      <div className="text-sm text-gray-600">{industry}</div>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+          )}
+
+          {/* Fallback if no classifications made */}
+          {!hasIcpData && !hasIndustryData && (
+            <div className="bg-white border border-gray-200 rounded p-8">
+              <p className="text-gray-600 text-center">
+                No classifications recorded yet
+              </p>
+            </div>
+          )}
         </div>
 
         {/* Export Button */}
@@ -132,6 +196,9 @@ export default function ExportPage() {
           </div>
         </div>
       </div>
+      {showConfetti && (
+        <Confetti onComplete={() => setShowConfetti(false)} />
+      )}
     </main>
   );
 }

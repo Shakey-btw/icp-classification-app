@@ -4,11 +4,13 @@ import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import CsvUpload from '@/components/upload/CsvUpload';
 import { storage, Session } from '@/lib/storage';
+import Trash2Icon from '@/components/ui/trash-icon';
 
 export default function HomePage() {
   const router = useRouter();
   const [existingSessions, setExistingSessions] = useState<Session[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [hoveredSessionId, setHoveredSessionId] = useState<string | null>(null);
 
   useEffect(() => {
     const loadSessions = async () => {
@@ -31,6 +33,16 @@ export default function HomePage() {
 
   const handleResumeSession = (sessionId: string) => {
     router.push(`/classify/${sessionId}`);
+  };
+
+  const handleDeleteSession = async (sessionId: string, e: React.MouseEvent) => {
+    e.stopPropagation();
+    try {
+      await storage.deleteSession(sessionId);
+      setExistingSessions(existingSessions.filter(s => s.session_id !== sessionId));
+    } catch (error) {
+      console.error('Failed to delete session:', error);
+    }
   };
 
   return (
@@ -58,8 +70,21 @@ export default function HomePage() {
                   <button
                     key={session.session_id}
                     onClick={() => handleResumeSession(session.session_id)}
-                    className="w-full text-left p-4 bg-white border border-gray-200 rounded hover:border-blue-400 hover:bg-blue-50 transition-all active:scale-[0.97]"
+                    onMouseEnter={() => setHoveredSessionId(session.session_id)}
+                    onMouseLeave={() => setHoveredSessionId(null)}
+                    className="relative w-full text-left p-4 bg-white border border-gray-200 rounded hover:border-blue-400 hover:bg-blue-50 transition-all active:scale-[0.97]"
                   >
+                    {/* Trash Icon - Top Right Corner */}
+                    {hoveredSessionId === session.session_id && (
+                      <button
+                        onClick={(e) => handleDeleteSession(session.session_id, e)}
+                        className="absolute top-3 right-3 p-1.5 rounded hover:bg-red-100 transition-colors z-10"
+                        aria-label="Delete session"
+                      >
+                        <Trash2Icon size={18} color="#EF4444" strokeWidth={2} />
+                      </button>
+                    )}
+
                     <div className="flex justify-between items-center">
                       <div>
                         <div className="font-medium text-gray-900">

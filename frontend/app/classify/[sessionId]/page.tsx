@@ -116,13 +116,13 @@ export default function ClassifyPage() {
     }
   };
 
-  // Keyboard navigation (only for ICP mode)
+  // Keyboard navigation
   useKeyboardNavigation({
-    onLeft: () => handleClassify('not_icp'),
-    onRight: () => handleClassify('icp'),
+    onLeft: mode === 'icp' ? () => handleClassify('not_icp') : () => {},
+    onRight: mode === 'icp' ? () => handleClassify('icp') : () => {},
     onUndo: handleUndo,
     onOpenInNewTab: handleOpenInNewTab,
-    enabled: !!session && mode === 'icp',
+    enabled: !!session,
   });
 
   if (!session || currentIndex >= websites.length) {
@@ -134,7 +134,7 @@ export default function ClassifyPage() {
   }
 
   const currentWebsite = websites[currentIndex];
-  const classifiedCount = Object.keys(session.classifications).length;
+  const classifiedCount = session.current_index;
 
   const handleDownload = () => {
     exportToCSV(
